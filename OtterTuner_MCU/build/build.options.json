@@ -1,0 +1,10 @@
+{
+  "additionalFiles": "../..",
+  "builtInToolsFolders": "",
+  "compiler.optimization_flags": "-Os",
+  "customBuildProperties": "build.warn_data_percentage=75",
+  "fqbn": "esp32:esp32:tinys3:DFUOnBoot=dfu,EventsCore=1,FlashMode=qio,PartitionScheme=default_8MB,EraseFlash=none,UploadSpeed=115200,USBMode=default,MSCOnBoot=msc,DebugLevel=none,CPUFreq=240,CDCOnBoot=cdc,LoopCore=1,PSRAM=enabled,UploadMode=cdc",
+  "hardwareFolders": "/Users/workryan/Library/Arduino15/packages",
+  "otherLibrariesFolders": "/Users/workryan/Documents/Arduino/libraries",
+  "sketchLocation": "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU"
+}

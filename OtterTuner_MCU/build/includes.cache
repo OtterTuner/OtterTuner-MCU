@@ -1,0 +1,17 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/Users/workryan/Library/Arduino15/packages/esp32/hardware/esp32/2.0.9/cores/esp32"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/Users/workryan/Library/Arduino15/packages/esp32/hardware/esp32/2.0.9/variants/um_tinys3"
+  },
+  {
+    "Sourcefile": "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU/build/sketch/OtterTuner_MCU.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]
