@@ -1,13 +1,13 @@
-#include <math.h>
-#include "C4.h"
+// #include "Guitar_C5.h"
+// #include "C4.h"
+#include "E2.h"
 
-#define LENGTH 512
+#define LENGTH 10000 
 
-float minFreq = 60.0;
-const float sample_freq = 22050;
+const int sample_freq = SOC_ADC_SAMPLE_FREQ_THRES_HIGH/2;
 
 // short rawData[LENGTH];
-int len = sizeof(rawData);
+// int len = sizeof(rawData);
 int count;
 int i, k;
 long sum, sum_old;
@@ -16,9 +16,9 @@ float freq_per = 0;
 short pd_state = 0;
 
 // Motor 1
-int motor1Pin1 = 37; 
-int motor1Pin2 = 35; 
-int enable1Pin = 36; 
+int motor1Pin1 = 37;
+int motor1Pin2 = 35;
+int enable1Pin = 36;
 
 // Encoder 1
 int encoderPin1 = 6;
@@ -38,12 +38,12 @@ void measureFrequency() {
 	sum = 0;
 	pd_state = 0;
 	int period = 0;
-	for(i = 0; i < len; i++) {
+
+	for(i = 0; i < LENGTH; i++) {
 		sum_old = sum;
 		sum = 0;
-		for(k = 0; k < len-i; k++) sum += (rawData[k]-128)*(rawData[k+i]-128)/256;
 
-		// Serial.println(sum);
+		for(k = 0; k < LENGTH-i; k++) sum += (rawData[k]-128)*(rawData[k+i]-128)/256;
 
 		if(pd_state == 2 && (sum-sum_old) <= 0){
 			period = i;
@@ -56,14 +56,11 @@ void measureFrequency() {
 			thresh = sum * 0.5;
 			pd_state = 1;
 		}
+	}
 
-		// for(i=0; i < len; i++) Serial.println(rawData[i]);
-
-		if(thresh > 100){
-			freq_per = sample_freq/period;
-			Serial.println(freq_per);
-		}
-		count = 0;
+	if(thresh > 100){
+		freq_per = sample_freq/period;
+		Serial.println(freq_per);
 	}
 }
 
@@ -152,9 +149,6 @@ void computePid() {
 }
 
 void setup() {
-	// analogReference(EXTERNAL);
-	// TODO: May need to change this depending on what the ADC pin is on ESP32
-	// analogRead(A0);
 	pinMode(motor1Pin1, OUTPUT);
 	pinMode(motor1Pin2, OUTPUT);
 	pinMode(enable1Pin, OUTPUT);
@@ -170,11 +164,12 @@ void setup() {
 
 	attachInterrupt(digitalPinToInterrupt(encoderPin1),readEncoder,RISING);
 
-	Serial.begin(115200);
-	delay(3000);
-	count = 0;
+	// analogReference(EXTERNAL);
+	// TODO: May need to change this depending on what the ADC pin is on ESP32
+	// analogRead(A0);
 
-	measureFrequency();
+	Serial.begin(115200);
+	count = 0;
 }
 
 void loop () {
@@ -185,5 +180,9 @@ void loop () {
 	// } else {
 	// }
 
-	computePid();
+	measureFrequency();
+
+	count = 0;
+
+	// computePid();
 }
