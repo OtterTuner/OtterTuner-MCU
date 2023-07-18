@@ -2,7 +2,7 @@
 // #include "C4.h"
 #include "E2.h"
 
-#define LENGTH 10000 
+#define LENGTH 5000
 
 const int sample_freq = SOC_ADC_SAMPLE_FREQ_THRES_HIGH/2;
 
@@ -12,7 +12,8 @@ int count;
 int i, k;
 long sum, sum_old;
 int thresh = 0;
-float freq_per = 0;
+float measured_freq = 0;
+float desired_freq = 82.4;
 short pd_state = 0;
 
 // Motor 1
@@ -59,8 +60,8 @@ void measureFrequency() {
 	}
 
 	if(thresh > 100){
-		freq_per = sample_freq/period;
-		Serial.println(freq_per);
+		measured_freq = sample_freq/period;
+		Serial.println(measured_freq);
 	}
 }
 
@@ -93,7 +94,7 @@ void readEncoder(){
 
 void computePid() {
 	// set target position
-	int target = 1500;
+	int target = desired_freq;
 	// int target = 250*sin(prevT/1e6);
 
 	// PID constants
@@ -113,7 +114,7 @@ void computePid() {
 	interrupts(); // turn interrupts back on
 
 	// error
-	int e = pos - target;
+	int e = measured_freq - target;
 
 	// derivative
 	float dedt = (e-eprev)/(deltaT);
@@ -181,8 +182,7 @@ void loop () {
 	// }
 
 	measureFrequency();
-
+	computePid();
 	count = 0;
 
-	// computePid();
 }
