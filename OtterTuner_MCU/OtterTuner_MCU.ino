@@ -7,7 +7,12 @@
 const int sample_freq = SOC_ADC_SAMPLE_FREQ_THRES_HIGH/2;
 
 // short rawData[LENGTH];
-// int len = sizeof(rawData);
+int len = sizeof(rawData);
+
+if(len > LENGTH) {
+	len = LENGTH;
+}
+
 int count;
 int i, k;
 long sum, sum_old;
@@ -40,11 +45,11 @@ void measureFrequency() {
 	pd_state = 0;
 	int period = 0;
 
-	for(i = 0; i < LENGTH; i++) {
+	for(i = 0; i < len; i++) {
 		sum_old = sum;
 		sum = 0;
 
-		for(k = 0; k < LENGTH-i; k++) sum += (rawData[k]-128)*(rawData[k+i]-128)/256;
+		for(k = 0; k < len-i; k++) sum += (rawData[k]-128)*(rawData[k+i]-128)/256;
 
 		if(pd_state == 2 && (sum-sum_old) <= 0){
 			period = i;
@@ -174,15 +179,14 @@ void setup() {
 }
 
 void loop () {
+	count = LENGTH;
 	
-	// if(count < LENGTH) {
-	// 	count++;
-	// 	rawData[count] = analogRead(A0)>>2;
-	// } else {
-	// }
-
-	measureFrequency();
-	computePid();
-	count = 0;
-
+	if(count < LENGTH) {
+		count++;
+		rawData[count] = analogRead(A0)>>2;
+	} else {
+		measureFrequency();
+		computePid();
+		// count = 0;
+	}
 }
