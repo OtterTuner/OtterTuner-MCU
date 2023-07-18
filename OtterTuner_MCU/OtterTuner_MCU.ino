@@ -1,17 +1,13 @@
 // #include "Guitar_C5.h"
 // #include "C4.h"
-#include "E2.h"
+// #include "E2.h"
 
 #define LENGTH 5000
 
 const int sample_freq = SOC_ADC_SAMPLE_FREQ_THRES_HIGH/2;
 
-// short rawData[LENGTH];
+short rawData[LENGTH];
 int len = sizeof(rawData);
-
-if(len > LENGTH) {
-	len = LENGTH;
-}
 
 int count;
 int i, k;
@@ -149,7 +145,6 @@ void computePid() {
 	// signal the motor
 	setMotor(dir,pwr,enable1Pin,motor1Pin1,motor1Pin2);
 
-
 	// store previous error
 	eprev = e;
 }
@@ -179,14 +174,12 @@ void setup() {
 }
 
 void loop () {
-	count = LENGTH;
-	
 	if(count < LENGTH) {
 		count++;
 		rawData[count] = analogRead(A0)>>2;
 	} else {
 		measureFrequency();
 		computePid();
-		// count = 0;
+		count = 0;
 	}
 }
