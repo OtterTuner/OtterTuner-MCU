@@ -4,7 +4,7 @@
 #define LENGTH 512
 
 float minFreq = 60.0;
-const float sample_freq = 80000;
+const float sample_freq = 22050;
 
 // short rawData[LENGTH];
 int len = sizeof(rawData);

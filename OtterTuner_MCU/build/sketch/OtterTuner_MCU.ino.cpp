@@ -1,26 +1,28 @@
 #include <Arduino.h>
 #line 1 "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU/OtterTuner_MCU.ino"
-#include <math.h>
-#include "C4.h"
+// #include "Guitar_C5.h"
+// #include "C4.h"
+#include "E2.h"
 
 #define LENGTH 512
 
-float minFreq = 60.0;
-const float sample_freq = 22050;
+const int sample_freq = SOC_ADC_SAMPLE_FREQ_THRES_HIGH/2;
 
 // short rawData[LENGTH];
 int len = sizeof(rawData);
+
 int count;
 int i, k;
 long sum, sum_old;
 int thresh = 0;
-float freq_per = 0;
+float measured_freq = 0;
+float desired_freq = 82.4;
 short pd_state = 0;
 
 // Motor 1
-int motor1Pin1 = 37; 
-int motor1Pin2 = 35; 
-int enable1Pin = 36; 
+int motor1Pin1 = 37;
+int motor1Pin2 = 35;
+int enable1Pin = 36;
 
 // Encoder 1
 int encoderPin1 = 6;
@@ -36,27 +38,16 @@ const int freq = 30000;
 const int pwmChannel = 0;
 const int resolution = 8;
 
-#line 37 "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU/OtterTuner_MCU.ino"
-void measureFrequency();
-#line 70 "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU/OtterTuner_MCU.ino"
-void setMotor(int dir, int pwmVal, int pwm, int in1, int in2);
-#line 87 "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU/OtterTuner_MCU.ino"
-void readEncoder();
-#line 97 "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU/OtterTuner_MCU.ino"
-void setup();
-#line 123 "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU/OtterTuner_MCU.ino"
-void loop();
-#line 37 "/Users/workryan/Workspace/OtterTuner-MCU/OtterTuner_MCU/OtterTuner_MCU.ino"
 void measureFrequency() {
 	sum = 0;
 	pd_state = 0;
 	int period = 0;
+
 	for(i = 0; i < len; i++) {
 		sum_old = sum;
 		sum = 0;
-		for(k = 0; k < len-i; k++) sum += (rawData[k]-128)*(rawData[k+i]-128)/256;
 
-		// Serial.println(sum);
+		for(k = 0; k < len-i; k++) sum += (rawData[k]-128)*(rawData[k+i]-128)/256;
 
 		if(pd_state == 2 && (sum-sum_old) <= 0){
 			period = i;
@@ -69,14 +60,11 @@ void measureFrequency() {
 			thresh = sum * 0.5;
 			pd_state = 1;
 		}
+	}
 
-		// for(i=0; i < len; i++) Serial.println(rawData[i]);
-
-		if(thresh > 100){
-			freq_per = sample_freq/period;
-			Serial.println(freq_per);
-		}
-		count = 0;
+	if(thresh > 100){
+		measured_freq = sample_freq/period;
+		Serial.println(measured_freq);
 	}
 }
 
@@ -107,42 +95,9 @@ void readEncoder(){
 	}
 }
 
-void setup() {
-	// analogReference(EXTERNAL);
-	// TODO: May need to change this depending on what the ADC pin is on ESP32
-	// analogRead(A0);
-	pinMode(motor1Pin1, OUTPUT);
-	pinMode(motor1Pin2, OUTPUT);
-	pinMode(enable1Pin, OUTPUT);
-
-	pinMode(encoderPin1, INPUT);
-	pinMode(encoderPin2, INPUT);
-
-	// configure LED PWM functionalitites
-	ledcSetup(pwmChannel, freq, resolution);
-
-	// attach the channel to the GPIO to be controlled
-	ledcAttachPin(enable1Pin, pwmChannel);
-
-	attachInterrupt(digitalPinToInterrupt(encoderPin1),readEncoder,RISING);
-
-	Serial.begin(115200);
-	delay(3000);
-	count = 0;
-
-	measureFrequency();
-}
-
-void loop () {
-	
-	// if(count < LENGTH) {
-	// 	count++;
-	// 	rawData[count] = analogRead(A0)>>2;
-	// } else {
-	// }
-
+void computePid() {
 	// set target position
-	int target = 1500;
+	int target = desired_freq;
 	// int target = 250*sin(prevT/1e6);
 
 	// PID constants
@@ -162,7 +117,7 @@ void loop () {
 	interrupts(); // turn interrupts back on
 
 	// error
-	int e = pos - target;
+	int e = measured_freq - target;
 
 	// derivative
 	float dedt = (e-eprev)/(deltaT);
@@ -195,5 +150,46 @@ void loop () {
 
 	// store previous error
 	eprev = e;
+}
+
+void setup() {
+	pinMode(motor1Pin1, OUTPUT);
+	pinMode(motor1Pin2, OUTPUT);
+	pinMode(enable1Pin, OUTPUT);
+
+	pinMode(encoderPin1, INPUT);
+	pinMode(encoderPin2, INPUT);
+
+	if(len > LENGTH) {
+		len = LENGTH;
+	}
+
+	// configure LED PWM functionalitites
+	ledcSetup(pwmChannel, freq, resolution);
+
+	// attach the channel to the GPIO to be controlled
+	ledcAttachPin(enable1Pin, pwmChannel);
+
+	attachInterrupt(digitalPinToInterrupt(encoderPin1),readEncoder,RISING);
+
+	// analogReference(EXTERNAL);
+	// TODO: May need to change this depending on what the ADC pin is on ESP32
+	// analogRead(A0);
+
+	Serial.begin(115200);
+	count = 0;
+}
+
+void loop () {
+	count = LENGTH;
+	
+	if(count < LENGTH) {
+		count++;
+		rawData[count] = analogRead(A0)>>2;
+	} else {
+		measureFrequency();
+		computePid();
+		count = 0;
+	}
 }
 
