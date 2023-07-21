@@ -17,6 +17,7 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
+#include <Preferences.h>
 
 // --------
 // Constants
@@ -40,6 +41,8 @@ static BLECharacteristic* g_pCharWrite = nullptr;
 static BLECharacteristic* g_pCharIndicate = nullptr;
 static bool g_centralConnected = false;
 static std::string g_cmdLine;
+
+Preferences preferences;
 
 // --------
 // Bluetooth event callbacks
@@ -90,6 +93,12 @@ private:
     void onWrite(BLECharacteristic* pCharacteristic) override
     {
         PrintEvent("onWrite", pCharacteristic->getValue().c_str());
+
+        preferences.begin("OtterTuner", false); 
+        preferences.putString("tuning", pCharacteristic->getValue().c_str()); 
+        String s = preferences.getString("tuning","");
+        Serial.println(s);
+        preferences.end();
     }
 
     void onNotify(BLECharacteristic* pCharacteristic) override
@@ -270,6 +279,11 @@ void PrintInfo()
     Serial.print(g_pCharIndicate->getValue().c_str());
     Serial.println("' UUID="CHAR_INDICATE_UUID);
     Serial.println("-------------------------------");
+    
+    preferences.begin("OtterTuner", false); 
+    String s = preferences.getString("tuning","");
+    Serial.println(s);
+    preferences.end();
 }
 
 void PrintHelp()
