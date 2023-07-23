@@ -2,9 +2,11 @@
 // #include "C4.h"
 // #include "E2.h"
 
-#define LENGTH 512
+#include <math.h>
 
-const int sample_freq = 16667;
+#define LENGTH 1024
+
+const float sample_freq = 16667;
 
 short rawData[LENGTH];
 int len = LENGTH;
@@ -13,8 +15,10 @@ int count;
 int i, k;
 long sum, sum_old;
 int thresh = 0;
-float measured_freq = 0;
-float desired_freq = 82.4;
+double measured_freq = 0;
+double valid_freq = 0;
+double desired_freq = 82.4;
+double freq_thres = 0.25 * desired_freq;
 short pd_state = 0;
 
 void measureFrequency() {
@@ -26,7 +30,7 @@ void measureFrequency() {
 		sum_old = sum;
 		sum = 0;
 
-		for(k = 0; k < len-i; k++) sum += (rawData[k]-128)*(rawData[k+i]-128)/256;
+		for(k = 0; k < len-i; k++) sum += (rawData[k]-2048)*(rawData[k+i]-2048)/4096;
 
 		if(pd_state == 2 && (sum-sum_old) <= 0){
 			period = i;
@@ -42,14 +46,14 @@ void measureFrequency() {
 		}
 	}
 
-	// if(thresh > 100){
-	// 	measured_freq = sample_freq/period;
-	// 	Serial.println(measured_freq);
-	// }
-
 	if(period != 0 && thresh > 100) {
 		measured_freq = sample_freq/period;
-		Serial.println(measured_freq);
+		double discrepancy = abs(desired_freq - measured_freq);
+
+		if(discrepancy < freq_thres) {
+			valid_freq = measured_freq;
+			Serial.printf("valid_freq: %f\r\n", valid_freq);
+		}
 	}
 }
 
@@ -62,7 +66,7 @@ void setup() {
 
 void loop () {
 	if(count < LENGTH) {
-		rawData[count] = analogRead(A0) >> 2;
+		rawData[count] = analogRead(A0);
 		count++;
 	} else {
 		measureFrequency();
