@@ -1,8 +1,9 @@
-#include <math.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
+#include <math.h>
+#include <string>
 #include <Preferences.h>
 
 /*
@@ -22,6 +23,12 @@ double desired_freq = TARGET_FREQ;
 double freq_thres = 0.15 * desired_freq;
 
 /*
+* String parsing globals
+*/
+
+double tunings[6] = {0};
+
+/*
 * BLE globals
 */
 
@@ -32,6 +39,7 @@ double freq_thres = 0.15 * desired_freq;
 #define CHAR_READ_UUID      "25AE1442-05D3-4C5B-8281-93D4E07420CF"
 #define CHAR_WRITE_UUID     "25AE1443-05D3-4C5B-8281-93D4E07420CF"
 #define CHAR_INDICATE_UUID  "25AE1444-05D3-4C5B-8281-93D4E07420CF"
+#define DEVICE_NAME         "OtterTuner"
 
 #define CMD_HELP "help"
 #define CMD_INFO "info"
@@ -125,7 +133,7 @@ private:
     {
         PrintEvent("onWrite", pCharacteristic->getValue().c_str());
 
-        preferences.begin("OtterTuner", false);
+        preferences.begin(DEVICE_NAME, false);
         preferences.putString("tuning", pCharacteristic->getValue().c_str());
         String s = preferences.getString("tuning","");
         Serial.println(s);
@@ -191,14 +199,14 @@ void PrintInfo()
     Serial.println("' UUID="CHAR_INDICATE_UUID);
     Serial.println("-------------------------------");
 
-    preferences.begin("OtterTuner", false);
+    preferences.begin(DEVICE_NAME, false);
     String s = preferences.getString("tuning","");
     Serial.println(s);
     preferences.end();
 }
 
 void bluetooth_init(){
-	BLEDevice::init("OtterTuner");
+	BLEDevice::init(DEVICE_NAME);
     g_pServer = BLEDevice::createServer();
     g_pServer->setCallbacks(new MyServerCallbacks());
     BLEService* pService = g_pServer->createService(SERVICE_UUID);
@@ -324,6 +332,7 @@ void setMotor(int dir, int pwmVal, int pwm, int in1, int in2){
 float kp = 85;
 float kd = 5;
 float ki = 5;
+
 void pid() {
   // set target position
   double target = desired_freq;
@@ -377,6 +386,30 @@ void pid() {
   // store previous error
   eprev = e;
 }
+
+void parseTuningString(String fullTuning) {
+  char delimiter = ',';
+  char closing = ']';
+
+  int strLength = fullTuning.length();
+  String tuning = "";
+  int tuningIndex = 0;
+
+  for(int i = 1; i < strLength; i++) {
+    if(fullTuning[i] == delimiter || fullTuning[i] == closing) {
+      //skip the comma and the space
+      i += 1;
+      tunings[tuningIndex] = tuning.toDouble();
+      // Serial.printf("tuning at %d: %f\r\n", tuningIndex, tunings[tuningIndex]);
+      tuningIndex++;
+      tuning = "";
+      continue;
+    }
+
+    tuning += fullTuning[i];
+  }
+}
+
 /*
 *	MAIN
 */
@@ -389,43 +422,67 @@ void setup() {
 }
 
 char in;
+int mode = 0;
+
 void loop () {
-  int mode = 0;
   if (Serial.available() > 0) {
     // read the incoming byte:
     in = Serial.read();
     if(in == 'p'){
       mode = 1;
+      Serial.println("MODE P");
     } else if(in == 'i'){
       mode = 2;
+      Serial.println("MODE I");
     } else if(in == 'd'){
       mode = 3;
+      Serial.println("MODE D");
+    } else if(in == 'c') {
+      Serial.printf("p: %f\r\ni: %f\r\nd: %f\r\n", kp, ki, kd);
     } else {
       if(in == '+'){
         if(mode == 1){
           kp++;
+          Serial.printf("p: %f\r\n", kp);
         } else if(mode == 2){
           ki++;
+          Serial.printf("i: %f\r\n", ki);
         } else if(mode == 3){
           kd++;
+          Serial.printf("d: %f\r\n", kd);
         }
       } else if(in == '-'){
         if(mode == 1){
           kp--;
+          Serial.printf("p: %f\r\n", kp);
         } else if(mode == 2){
           ki--;
+          Serial.printf("i: %f\r\n", ki);
         } else if(mode == 3){
           kd--;
+          Serial.printf("d: %f\r\n", kd);
         }
       } else {
         mode = 0;
+        Serial.println("MODE CLEARED");
       }
     }
   }
+
 	if(count < LENGTH) {
 		rawData[count] = analogRead(A0);
 		count++;
 	} else {
+    double prev_freq = desired_freq;
+
+    preferences.begin(DEVICE_NAME, true);
+    String tuning = preferences.getString("tuning", "");
+    parseTuningString(tuning);
+
+    desired_freq = tunings[0];
+    // Serial.printf("desired freq: %f\r\n", desired_freq);
+    preferences.end();
+
 		pid();
 		count = 0;
 	}
