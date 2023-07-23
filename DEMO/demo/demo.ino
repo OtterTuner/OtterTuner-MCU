@@ -20,7 +20,7 @@ int len = LENGTH;
 int count = 0;
 int thresh = 0;
 double desired_freq = TARGET_FREQ;
-double freq_thres = 0.15 * desired_freq;
+double freq_thres = 0.20 * desired_freq;
 
 /*
 * String parsing globals
@@ -61,6 +61,10 @@ Preferences preferences;
 /*
 * Motor globals
 */
+
+float kp = 100;
+float ki = 1;
+float kd = 10;
 
 // Motor 1
 int motor1Pin1 = 37;
@@ -283,7 +287,8 @@ double measureFrequency() {
     }
 
     if(period != 0 && thresh > 70) {
-      measured_freq = sample_freq/period;
+      // offset by 4 because we're bad lol
+      measured_freq = sample_freq/period - 4;
       double discrepancy = abs(desired_freq - measured_freq);
 
       if(discrepancy < freq_thres) {
@@ -328,10 +333,6 @@ void setMotor(int dir, int pwmVal, int pwm, int in1, int in2){
     digitalWrite(in2,LOW);
   }
 }
-
-float kp = 85;
-float kd = 5;
-float ki = 5;
 
 void pid() {
   // set target position
