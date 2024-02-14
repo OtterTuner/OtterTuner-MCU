@@ -36,12 +36,12 @@ void loop() {
 		rawData[count] = analogRead(A0);
 		count++;
 	} else {
-		double prev_freq = desired_freq;
-		desired_freq = get_tuning();
-		// Serial.printf("desired freq: %f\r\n", desired_freq);
-
 		double current_frequency = measureFrequency();
 		string_number = stringCheck(current_frequency);
+
+		double prev_freq = desired_freq;
+		desired_freq = get_tuning();
+		Serial.printf("desired freq: %f\r\n", desired_freq);
 
 		pid(current_frequency);
 		count = 0;
