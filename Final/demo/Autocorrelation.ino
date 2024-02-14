@@ -56,44 +56,45 @@ int stringCheck(double frequency){
 * 	TUNING SENSING
 */
 double measureFrequency() {
-	int sum = 0;
-	static int sum_old = 0;
-	static short pd_state = 0;
-	int period = 0;
-	double measured_freq;
+    int sum = 0;
+    static int sum_old = 0;
+    static short pd_state = 0;
+    int period = 0;
+    double measured_freq;
 
-	for(int attempts = 0; attempts < 32; attempts++){
-		for(int i = 0; i < len; i++) {
-			sum_old = sum;
-			sum = 0;
+    for(int attempts = 0; attempts < 32; attempts++){
+        for(int i = 0; i < len; i++) {
+            sum_old = sum;
+            sum = 0;
 
-			for(int k = 0; k < len-i; k++) sum += (rawData[k]-2048)*(rawData[k+i]-2048)/4096;
+            for(int k = 0; k < len-i; k++) sum += (rawData[k]-2048)*(rawData[k+i]-2048)/4096;
 
-			if(pd_state == 2 && (sum-sum_old) <= 0){
-				period = i;
-				// Serial.printf("period: %d\n", period);
-				pd_state = 3;
-			}
+            if(pd_state == 2 && (sum-sum_old) <= 0){
+                period = i;
+                // Serial.printf("period: %d\n", period);
+                pd_state = 3;
+            }
 
-			if(pd_state == 1 && (sum > thresh) && (sum-sum_old) > 0) pd_state = 2;
+            if(pd_state == 1 && (sum > thresh) && (sum-sum_old) > 0) pd_state = 2;
 
-			if(!i) {
-				thresh = sum * 0.5;
-				pd_state = 1;
-			}
-		}
+            if(!i) {
+                thresh = sum * 0.5;
+                pd_state = 1;
+            }
+        }
 
-		if(period != 0 && thresh > 70) {
-			// offset by 4 because we're bad lol
-			measured_freq = sample_freq/period - 4;
-			double discrepancy = abs(desired_freq - measured_freq);
+        if(period != 0 && thresh > 70) {
+            // offset by 4 because we're bad lol
+            measured_freq = sample_freq/period - 4;
+            double discrepancy = abs(desired_freq - measured_freq);
 
-			if(discrepancy < freq_thres) {
-				Serial.printf("measured_frequency: %f\r\n", measured_freq);
-				return measured_freq;
-			}
-		}
-	}
-  return -1;
+            if(discrepancy < freq_thres) {
+                Serial.printf("measured_frequency: %f\r\n", measured_freq);
+                return measured_freq;
+            }
+        }
+    }
+
+    return -1;
 }
 
