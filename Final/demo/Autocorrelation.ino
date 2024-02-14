@@ -21,35 +21,35 @@ double freq_thres = 0.20 * desired_freq;
  */
 
 void parseTuningString(String fullTuning) {
-  char delimiter = ',';
-  char closing = ']';
+    char delimiter = ',';
+    char closing = ']';
 
-  int strLength = fullTuning.length();
-  String tuning = "";
-  int tuningIndex = 0;
+    int strLength = fullTuning.length();
+    String tuning = "";
+    int tuningIndex = 0;
 
-  for(int i = 1; i < strLength; i++) {
-    if(fullTuning[i] == delimiter || fullTuning[i] == closing) {
-      //skip the comma and the space
-      i += 1;
-      tunings[tuningIndex] = tuning.toDouble();
-      // Serial.printf("tuning at %d: %f\r\n", tuningIndex, tunings[tuningIndex]);
-      tuningIndex++;
-      tuning = "";
-      continue;
+    for(int i = 1; i < strLength; i++) {
+        if(fullTuning[i] == delimiter || fullTuning[i] == closing) {
+            //skip the comma and the space
+            i += 1;
+            tunings[tuningIndex] = tuning.toDouble();
+            // Serial.printf("tuning at %d: %f\r\n", tuningIndex, tunings[tuningIndex]);
+            tuningIndex++;
+            tuning = "";
+            continue;
+        }
+
+        tuning += fullTuning[i];
     }
-
-    tuning += fullTuning[i];
-  }
 }
 
 int stringCheck(double frequency){
-	if(frequency>70 && frequency<90){ return 0; }
-	if(frequency>100 && frequency<120){ return 1; }
-	if(frequency>135 && frequency<155){ return 2; }
-	if(frequency>186 && frequency<205){ return 3; }
-	if(frequency>235 && frequency<255){ return 4; }
-	if(frequency>320 && frequency<340){ return 5; }
+    if(frequency>70 && frequency<90){ return 0; }
+    if(frequency>100 && frequency<120){ return 1; }
+    if(frequency>135 && frequency<155){ return 2; }
+    if(frequency>186 && frequency<205){ return 3; }
+    if(frequency>235 && frequency<255){ return 4; }
+    if(frequency>320 && frequency<340){ return 5; }
 }
 
 /*
