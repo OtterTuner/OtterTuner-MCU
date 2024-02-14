@@ -41,6 +41,7 @@ void loop() {
 		// Serial.printf("desired freq: %f\r\n", desired_freq);
 
 		double current_frequency = measureFrequency();
+		string_number = stringCheck(current_frequency);
 
 		pid(current_frequency);
 		count = 0;

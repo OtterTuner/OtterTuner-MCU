@@ -42,6 +42,27 @@ void parseTuningString(String fullTuning) {
   }
 }
 
+int stringCheck(double frequency){
+  if(frequency>70 && frequency<90){
+	return 0;
+  }
+  if(frequency>100 && frequency<120){
+	return 1;
+  }
+  if(frequency>135 && frequency<155){
+	return 2;
+  }
+  if(frequency>186 && frequency<205){
+	return 3;
+  }
+  if(frequency>235 && frequency<255){
+	return 4;
+  }
+  if(frequency>320 && frequency<340){
+	return 5;
+  }
+}
+
 /*
 * 	TUNING SENSING
 */
