@@ -1,3 +1,10 @@
+/*
+*   The Version of OtterTuner presented at the end of ECE498A on July 26, 2023
+*
+*   Author: Ryan Bui
+*   Additional team members: Cole Gravelle, Jameson Smith, Wenrui Zhang, Alicia Ng
+*/
+
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
