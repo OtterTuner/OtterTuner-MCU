@@ -36,7 +36,7 @@ void adc_setup(){
 	adc_pattern.unit = ADC_UNIT_1;
 	adc_pattern.bit_width = 12;
 
-    adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_0);
+    adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_0);
 
 	adc_digi_configuration_t controller_config;
 	controller_config.conv_limit_en = 0;
@@ -66,14 +66,14 @@ void loop() {
         desired_freq = tunings[string_number];
         Serial.printf("string number: %d\r\n", string_number);
     } else if (in == 'p') {
-        string_number--;
+        string_number = (string_number - 1) % 6;
         desired_freq = tunings[string_number];
         Serial.printf("string number: %d\r\n", string_number);
     }
 
     double startTime = millis();
     for (int i = 0; i < LENGTH; i++) {
-        rawData[i] = adc1_get_raw(ADC1_CHANNEL_0);
+        rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
     }
     double endTime = millis();
     sample_freq = (LENGTH / (endTime - startTime)) * 1000;
@@ -83,6 +83,8 @@ void loop() {
     double current_frequency = measureFrequency(sample_freq);
     // Serial.printf("desired freq: %f\r\n", desired_freq);
 
-    pid(current_frequency);
+	Serial.println(current_frequency);
+
+    // pid(current_frequency);
     count = 0;
 }
