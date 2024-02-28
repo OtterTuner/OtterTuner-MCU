@@ -49,28 +49,18 @@ void adc_setup(){
 }
 
 void setup() {
-	Serial.begin(115200);
-	motorSetup();
-	bluetooth_init();
+    Serial.begin(115200);
+    motorSetup();
+    bluetooth_init();
     adc_setup();
+    buttonSetup();
     sample_freq = 0;
-	delay(3000);
-	Serial.println("setup complete");
+    delay(3000);
+    Serial.println("setup complete");
 }
 
 void loop() {
 	// Serial_Monitor();
-    int in = Serial.read();
-    if (in == 'n') {
-        string_number = (string_number + 1) % 6;
-        desired_freq = tunings[string_number];
-        Serial.printf("string number: %d\r\n", string_number);
-    } else if (in == 'p') {
-        string_number = (string_number - 1) % 6;
-        desired_freq = tunings[string_number];
-        Serial.printf("string number: %d\r\n", string_number);
-    }
-
     double startTime = millis();
     for (int i = 0; i < LENGTH; i++) {
         rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
