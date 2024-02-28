@@ -85,6 +85,8 @@ void loop() {
         desired_freq = get_tuning();
         double current_frequency = measureFrequency(sample_freq);
         Serial.printf("current_frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);
+
+        pid(current_frequency);
     // } else {
         // TODO: Insert battery reading code
     }
