@@ -7,12 +7,19 @@
 #define LENGTH 4000
 
 Preferences preferences;
-double tunings[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
-int string_number;
 double desired_freq;
 double sample_freq;
 int count = 0;
 short rawData[LENGTH];
+
+/*
+ * Indices for string numbers are as follows:
+ * E2 A2 D3 G3 B3 E4
+ * 0  1  2  3  4  5
+ */
+
+double tunings[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
+int string_number;
 
 double get_tuning(){
 	preferences.begin(DEVICE_NAME, true);
@@ -80,6 +87,7 @@ void loop() {
 
     double prev_freq = desired_freq;
 
+    desired_freq = get_tuning();
     double current_frequency = measureFrequency(sample_freq);
     // Serial.printf("desired freq: %f\r\n", desired_freq);
 
