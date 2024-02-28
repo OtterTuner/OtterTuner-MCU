@@ -9,7 +9,6 @@
 Preferences preferences;
 double desired_freq;
 double sample_freq;
-int count = 0;
 short rawData[LENGTH];
 
 /*
@@ -39,7 +38,7 @@ void adc_setup(){
 
 	adc_digi_pattern_config_t adc_pattern;
 	adc_pattern.atten = ADC_ATTEN_DB_0;
-	adc_pattern.channel = ADC1_CHANNEL_6;
+	adc_pattern.channel = ADC1_CHANNEL_4;
 	adc_pattern.unit = ADC_UNIT_1;
 	adc_pattern.bit_width = 12;
 
@@ -89,10 +88,7 @@ void loop() {
 
     desired_freq = get_tuning();
     double current_frequency = measureFrequency(sample_freq);
-    // Serial.printf("desired freq: %f\r\n", desired_freq);
+    Serial.printf("current frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);
 
-	Serial.println(current_frequency);
-
-    // pid(current_frequency);
-    count = 0;
+    pid(current_frequency);
 }
