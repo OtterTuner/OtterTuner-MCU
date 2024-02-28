@@ -28,10 +28,30 @@
 
 int LEDS[NUM_LEDS] = {LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN};
 
+TaskHandle_t producerTask;
+SemaphoreHandle_t semaphore;
+
 Preferences preferences;
 double desired_freq;
 double sample_freq;
 short rawData[LENGTH];
+bool bufferFull = false;
+
+void producerTaskCode( void * parameters ) {
+    for(;;) {
+        // Serial.printf("bufferFull inside core 0: %d\r\n", bufferFull);
+        if (semaphore != NULL && xSemaphoreTake( semaphore, (TickType_t) 10) == pdTRUE ) {
+            if( bufferFull == false ) {
+                int cid = xPortGetCoreID();
+                Serial.printf("Producer task code running on core %d\r\n", cid);
+                getSamples();
+                Serial.printf("buffer full, sample freq: %d\r\n", sample_freq);
+                bufferFull = true;
+            }
+            xSemaphoreGive( semaphore );
+        }
+    }
+}
 
 /*
  * Indices for string numbers are as follows:
@@ -65,9 +85,20 @@ void setup() {
     buttonSetup();
     LED_Setup();
     sample_freq = 0;
-    delay(3000);
     pinMode( VBAT_PIN, OUTPUT );
-    Serial.println("setup complete");
+
+    semaphore = xSemaphoreCreateMutex();
+    xTaskCreatePinnedToCore(
+        producerTaskCode,
+        "Producer Task",
+        10000,
+        NULL,
+        1,
+        &producerTask,
+        0
+    );
+
+	Serial.println("setup complete");
 }
 
 void loop() {
@@ -83,10 +114,21 @@ void loop() {
             Serial.println("Unwinding string");
             unwindString();
         } else {
-            getSamples();
-
             double prev_freq = desired_freq;
             desired_freq = get_tuning();
+
+            if (semaphore != NULL && xSemaphoreTake(semaphore, (TickType_t) 10) == pdTRUE ) {
+                if( bufferFull == true ) {
+                    Serial.printf("buffer is full inside loop\r\n");
+                    double current_frequency = measureFrequency(sample_freq);
+                    Serial.printf("current_frequency: %f, desired freq: %f\r\n", current_frequency, desired_freq);
+                    pid(current_frequency);
+
+                    bufferFull = false;
+                    Serial.printf("bufferFull after frequency detection: %d\r\n", bufferFull);
+                }
+                xSemaphoreGive( semaphore );
+            }
 
             double current_frequency = measureFrequency(sample_freq);
             Serial.printf("current_frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);

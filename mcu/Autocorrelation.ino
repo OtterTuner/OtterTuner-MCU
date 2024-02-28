@@ -17,6 +17,12 @@ void getSamples(){
 /*
  * String parsing globals
  */
+
+/*
+ * Indices are as follows:
+ * E2 A2 D3 G3 B3 E4
+ * 0  1  2  3  4  5
+ */
 void parseTuningString(String fullTuning) {
     char delimiter = ',';
     char closing = ']';
