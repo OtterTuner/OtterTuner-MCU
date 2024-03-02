@@ -5,6 +5,7 @@
 
 #define DEVICE_NAME "OtterTuner"
 #define LENGTH 4000
+#define TUNING_BUTTON_PIN 10
 
 Preferences preferences;
 double tunings[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
@@ -61,20 +62,23 @@ void setup() {
 
 void loop() {
 	// Serial_Monitor();
-    double startTime = millis();
-    for (int i = 0; i < LENGTH; i++) {
-        rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
+    
+    // bool isTuningOn = digitalRead( TUNING_BUTTON_PIN );
+    bool isTuningOn = false;
+    
+    if( isTuningOn ) {
+        double startTime = millis();
+        for (int i = 0; i < LENGTH; i++) {
+            rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
+        }
+        double endTime = millis();
+        sample_freq = (LENGTH / (endTime - startTime)) * 1000;
+
+        double prev_freq = desired_freq;
+
+        double current_frequency = measureFrequency(sample_freq);
+        Serial.printf("current_frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);
+    // } else {
+        // TODO: Insert battery reading code
     }
-    double endTime = millis();
-    sample_freq = (LENGTH / (endTime - startTime)) * 1000;
-
-    double prev_freq = desired_freq;
-
-    double current_frequency = measureFrequency(sample_freq);
-    // Serial.printf("desired freq: %f\r\n", desired_freq);
-
-	Serial.println(current_frequency);
-
-    // pid(current_frequency);
-    count = 0;
 }
