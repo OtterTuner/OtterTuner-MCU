@@ -1,5 +1,5 @@
 #define STRING_SWITCH_PIN   9
-#define DEBOUNCE_TIME       200
+#define DEBOUNCE_TIME       100
 #define HOLD_THRESHOLD      1000
 
 volatile int pressed_time = 0;
