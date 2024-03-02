@@ -20,8 +20,6 @@ void IRAM_ATTR ISR() {
             if( time - pressed_time < HOLD_THRESHOLD ) {
                 string_number = ( string_number + 1 ) % 6;
                 Serial.printf("string number: %d\r\n", string_number);
-
-                desired_freq = tunings[string_number];
             } else {
                 Serial.println("Entering Bluetooth mode");
                 g_centralConnected = false;
