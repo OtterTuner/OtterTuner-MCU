@@ -87,7 +87,7 @@ void loop() {
         Serial.printf("current_frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);
 
         pid(current_frequency);
-    // } else {
+    } else {
         // TODO: Insert battery reading code
     }
 }
