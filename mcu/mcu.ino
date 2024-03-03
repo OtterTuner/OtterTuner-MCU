@@ -5,7 +5,8 @@
 
 #define DEVICE_NAME "OtterTuner"
 #define LENGTH 4000
-#define TUNING_BUTTON_PIN 8
+#define TUNING_BUTTON_PIN   8
+#define STRING_SWITCH_PIN   9
 
 Preferences preferences;
 double desired_freq;
@@ -20,6 +21,12 @@ short rawData[LENGTH];
 
 double tunings[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
 int string_number;
+
+volatile bool buttonInterrupt = false;
+
+void IRAM_ATTR ISR() {
+    buttonInterrupt = true;
+}
 
 double get_tuning(){
 	preferences.begin(DEVICE_NAME, true);
@@ -49,7 +56,10 @@ void loop() {
 	// Serial_Monitor();
     int isTuningOn = digitalRead( TUNING_BUTTON_PIN );
     
-    if( isTuningOn == HIGH ) {
+    if( buttonInterrupt ) {
+        buttonHandler();
+        buttonInterrupt = false;
+    } else if( isTuningOn == HIGH ) {
         double startTime = millis();
         for (int i = 0; i < LENGTH; i++) {
             rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
@@ -66,7 +76,7 @@ void loop() {
         pid(current_frequency);
     } else {
         // TODO: Insert battery reading code
-        int batteryVoltage = analogRead(ADC1_CHANNEL_9);
-        Serial.printf("Battery Voltage: %d\r\n", batteryVoltage);
+        int batteryVoltage = analogRead(ADC1_CHANNEL_MAX);
+        // Serial.printf("Battery Voltage: %d\r\n", batteryVoltage);
     }
 }
