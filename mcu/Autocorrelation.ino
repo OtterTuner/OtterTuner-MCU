@@ -1,14 +1,18 @@
 #define OFFSET          2048
 #define MAX_ADC_VALUE   4096
 
-extern double tunings[6];
-extern int string_number;
-extern short rawData[LENGTH];
-extern double desired_freq;
-
 int len = LENGTH;
 int thresh = 0;
 double freq_thres = 0.20 * desired_freq;
+
+void getSamples(){
+        double startTime = millis();
+        for (int i = 0; i < LENGTH; i++) {
+            rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
+        }
+        double endTime = millis();
+        sample_freq = (LENGTH / (endTime - startTime)) * 1000;
+}
 
 /*
  * String parsing globals

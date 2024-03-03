@@ -80,12 +80,7 @@ void loop() {
             Serial.println("Unwinding string");
             unwindString();
         } else {
-            double startTime = millis();
-            for (int i = 0; i < LENGTH; i++) {
-                rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
-            }
-            double endTime = millis();
-            sample_freq = (LENGTH / (endTime - startTime)) * 1000;
+            getSamples();
 
             double prev_freq = desired_freq;
             desired_freq = get_tuning();
