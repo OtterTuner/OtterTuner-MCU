@@ -33,22 +33,23 @@ SemaphoreHandle_t semaphore;
 
 Preferences preferences;
 double desired_freq;
+double current_frequency;
 double sample_freq;
 short rawData[LENGTH];
 bool bufferFull = false;
 
 void producerTaskCode( void * parameters ) {
-    for(;;) {
-        // Serial.printf("bufferFull inside core 0: %d\r\n", bufferFull);
-        if (semaphore != NULL && xSemaphoreTake( semaphore, (TickType_t) 10) == pdTRUE ) {
-            if( bufferFull == false ) {
-                int cid = xPortGetCoreID();
-                Serial.printf("Producer task code running on core %d\r\n", cid);
-                getSamples();
-                Serial.printf("buffer full, sample freq: %d\r\n", sample_freq);
-                bufferFull = true;
-            }
+    for(;;)
+    {
+        if (semaphore != NULL && xSemaphoreTake( semaphore, (TickType_t) 10) == pdTRUE )
+        {
+            int cid = xPortGetCoreID();
+            // Serial.printf("Producer task code running on core %d\r\n", cid);
+            getSamples();
+            current_frequency = measureFrequency(sample_freq);
+            Serial.printf("current_frequency: %f, desired freq: %f\r\n", current_frequency, desired_freq);
             xSemaphoreGive( semaphore );
+            delay(10);
         }
     }
 }
@@ -105,37 +106,39 @@ void loop() {
 	// Serial_Monitor();
     int isTuningOn = digitalRead( TUNING_BUTTON_PIN );
     
-    if( buttonInterrupt ) {
+    if( buttonInterrupt )
+    {
         buttonHandler();
         buttonInterrupt = false;
-    } else if( isTuningOn == HIGH ) {
+    }
+    else if ( isTuningOn == HIGH )
+    {
+
         // If we're at string number 6, then we're unwinding the string
-        if (string_number == UNWIND_MODE) {
+        if (string_number == UNWIND_MODE)
+        {
             Serial.println("Unwinding string");
             unwindString();
-        } else {
+        }
+        else
+        {
             double prev_freq = desired_freq;
             desired_freq = get_tuning();
-
-            if (semaphore != NULL && xSemaphoreTake(semaphore, (TickType_t) 10) == pdTRUE ) {
-                if( bufferFull == true ) {
-                    Serial.printf("buffer is full inside loop\r\n");
-                    double current_frequency = measureFrequency(sample_freq);
-                    Serial.printf("current_frequency: %f, desired freq: %f\r\n", current_frequency, desired_freq);
-                    pid(current_frequency);
-
-                    bufferFull = false;
-                    Serial.printf("bufferFull after frequency detection: %d\r\n", bufferFull);
-                }
-                xSemaphoreGive( semaphore );
+            if( semaphore != NULL && xSemaphoreTake(semaphore, (TickType_t) 10) == pdTRUE) {
+                Serial.printf("In tuning mode. Current Frequency: %f\r\n", current_frequency);
+                pid(current_frequency);
+                xSemaphoreGive(semaphore);
             }
         }
-    } else {
+    }
+    else
+    {
         // TODO: Insert battery reading code
         float batteryVoltage = analogRead(ADC1_CHANNEL_MAX);
         float batteryPercentage = batteryVoltage / MAX_ADC_VALUE;
 
-        if( batteryPercentage <= 0.2) {
+        if( batteryPercentage <= 0.2)
+        {
             Serial.println("Battery low!");
             LowBatteryAnimation();
         }
