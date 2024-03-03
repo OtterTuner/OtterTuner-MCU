@@ -4,13 +4,26 @@
 #include <driver/adc.h>
 
 #define DEVICE_NAME "OtterTuner"
+
 #define LENGTH 4000
+#define MAX_ADC_VALUE       4096
+
 #define STRING_SWITCH_PIN   3
 #define TUNING_BUTTON_PIN   4
 #define VBAT_PIN            10
-#define MAX_ADC_VALUE       4096
+
 #define NUM_STRINGS         6
 #define UNWIND_MODE         6
+
+#define NUM_LEDS        6
+#define LED1_PIN        35
+#define LED2_PIN        37
+#define LED3_PIN        36
+#define LED4_PIN        34
+#define LED5_PIN        9
+#define LED6_PIN        8
+
+int LEDS[NUM_LEDS] = {LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN};
 
 Preferences preferences;
 double desired_freq;
@@ -41,16 +54,13 @@ double get_tuning(){
 	return tunings[string_number];
 }
 
-void setup_batteryADC() {
-
-}
-
 void setup() {
     Serial.begin(115200);
     motorSetup();
     bluetooth_init();
     adc_setup();
     buttonSetup();
+    LED_Setup();
     sample_freq = 0;
     delay(3000);
     pinMode( VBAT_PIN, OUTPUT );
@@ -92,6 +102,7 @@ void loop() {
 
         if( batteryPercentage <= 0.2) {
             Serial.println("Battery low!");
+            LowBatteryAnimation();
         }
     }
 }
