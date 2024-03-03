@@ -9,6 +9,8 @@
 #define TUNING_BUTTON_PIN   4
 #define VBAT_PIN            10
 #define MAX_ADC_VALUE       4096
+#define NUM_STRINGS         6
+#define UNWIND_MODE         6
 
 Preferences preferences;
 double desired_freq;
@@ -21,8 +23,8 @@ short rawData[LENGTH];
  * 0  1  2  3  4  5
  */
 
-double tunings[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
-int string_number;
+double tunings[NUM_STRINGS] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
+int string_number = 0;
 
 volatile bool buttonInterrupt = false;
 
@@ -63,20 +65,26 @@ void loop() {
         buttonHandler();
         buttonInterrupt = false;
     } else if( isTuningOn == HIGH ) {
-        double startTime = millis();
-        for (int i = 0; i < LENGTH; i++) {
-            rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
+        // If we're at string number 6, then we're unwinding the string
+        if (string_number == UNWIND_MODE) {
+            Serial.println("Unwinding string");
+            unwindString();
+        } else {
+            double startTime = millis();
+            for (int i = 0; i < LENGTH; i++) {
+                rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
+            }
+            double endTime = millis();
+            sample_freq = (LENGTH / (endTime - startTime)) * 1000;
+
+            double prev_freq = desired_freq;
+            desired_freq = get_tuning();
+
+            double current_frequency = measureFrequency(sample_freq);
+            Serial.printf("current_frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);
+
+            pid(current_frequency);
         }
-        double endTime = millis();
-        sample_freq = (LENGTH / (endTime - startTime)) * 1000;
-
-        double prev_freq = desired_freq;
-
-        desired_freq = get_tuning();
-        double current_frequency = measureFrequency(sample_freq);
-        Serial.printf("current_frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);
-
-        pid(current_frequency);
     } else {
         // TODO: Insert battery reading code
         float batteryVoltage = analogRead(ADC1_CHANNEL_MAX);

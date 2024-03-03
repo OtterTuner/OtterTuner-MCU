@@ -38,6 +38,10 @@ void motorSetup() {
   ledcAttachPin(enable1Pin, pwmChannel);
 }
 
+void unwindString(){
+    setMotor(-1, 256, NULL, motor1Pin1, motor1Pin2);
+}
+
 void setMotor(int dir, int pwmVal, int pwm, int in1, int in2){
   ledcWrite(pwmChannel, pwmVal);
 

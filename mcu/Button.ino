@@ -57,8 +57,19 @@ void buttonHandler() {
             ledPattern();
             ledPattern();
         } else {
-            string_number = (string_number + 1) % 6;
-            Serial.printf("New String number: %d\r\n", string_number);
+            string_number = (string_number + 1) % 7;
+            if(string_number == 6) {
+                Serial.println("Unwinding string mode");
+                digitalWrite(LEDS[NUM_LEDS-1], LOW);
+            } else if (string_number > 0){
+                Serial.printf("New String number: %d\r\n", string_number);
+                digitalWrite(LEDS[string_number-1], LOW);
+                digitalWrite(LEDS[string_number], HIGH);
+            } else {
+                Serial.printf("New String number: %d\r\n", string_number);
+                digitalWrite(LEDS[0], HIGH);
+            }
+
         }
     }
 }
