@@ -5,8 +5,8 @@
 
 #define DEVICE_NAME "OtterTuner"
 #define LENGTH 4000
-#define TUNING_BUTTON_PIN   8
-#define STRING_SWITCH_PIN   9
+#define STRING_SWITCH_PIN   3
+#define TUNING_BUTTON_PIN   4
 
 Preferences preferences;
 double desired_freq;

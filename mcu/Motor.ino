@@ -3,8 +3,8 @@
 */
 
 // Motor 1
-int motor1Pin1 = 37;
-int motor1Pin2 = 35;
+int motor1Pin1 = 7;
+int motor1Pin2 = 6;
 int enable1Pin = 36;
 
 // Encoder 1
