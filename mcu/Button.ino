@@ -27,7 +27,7 @@ void buttonHandler() {
             BLEAnimation();
         } else {
             string_number = (string_number + 1) % 7;
-            if(string_number == 6) {
+            if(string_number == UNWIND_MODE) {
                 Serial.println("Unwinding string mode");
                 digitalWrite(LEDS[NUM_LEDS-1], LOW);
             } else if (string_number > 0){
