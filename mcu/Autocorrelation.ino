@@ -1,10 +1,6 @@
 #define OFFSET          2048
 #define MAX_ADC_VALUE   4096
 
-extern double tunings[6];
-extern int string_number;
-extern double desired_freq;
-
 int len = LENGTH;
 int thresh = 0;
 double freq_thres = 0.20 * desired_freq;
@@ -74,50 +70,10 @@ void adc_setup(){
     controller_config.format = ADC_DIGI_OUTPUT_FORMAT_TYPE2;
 }
 
-void parseTuningString(String fullTuning) {
-    char delimiter = ',';
-    char closing = ']';
-
-    int strLength = fullTuning.length();
-    String tuning = "";
-    int tuningIndex = 0;
-
-    for(int i = 1; i < strLength; i++) {
-        if(fullTuning[i] == delimiter || fullTuning[i] == closing) {
-            //skip the comma and the space
-            i += 1;
-            tunings[tuningIndex] = tuning.toDouble();
-            tuningIndex++;
-            tuning = "";
-            continue;
-        }
-
-        tuning += fullTuning[i];
-    }
-}
-
-double avg_buffer(){
-    double sum = 0;
-    for(int i = 0; i < len; i++) sum += rawData[i];
-    return sum/len;
-}
-
-double max_buffer(){
-    double max = 0;
-    for(int i = 0; i < len; i++) if(rawData[i] > max) max = rawData[i];
-    return max;
-}
-
-double min_buffer(){
-    double min = 4096;
-    for(int i = 0; i < len; i++) if(rawData[i] < min) min = rawData[i];
-    return min;
-}
-
 /*
 * 	TUNING SENSING
 */
-double measureFrequency(double sample_freq, short* sampleData) {
+double measureFrequency(double sample_freq) {
     int sum = 0;
     static int sum_old = 0;
     static short pd_state = 0;
