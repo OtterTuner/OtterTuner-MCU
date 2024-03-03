@@ -3,8 +3,8 @@
 */
 
 // Motor 1
-int motor1Pin1 = 37;
-int motor1Pin2 = 35;
+int motor1Pin1 = 7;
+int motor1Pin2 = 6;
 int enable1Pin = 36;
 
 // Encoder 1
@@ -36,6 +36,10 @@ void motorSetup() {
 
   // attach the channel to the GPIO to be controlled
   ledcAttachPin(enable1Pin, pwmChannel);
+}
+
+void unwindString(){
+    setMotor(-1, 256, NULL, motor1Pin1, motor1Pin2);
 }
 
 void setMotor(int dir, int pwmVal, int pwm, int in1, int in2){

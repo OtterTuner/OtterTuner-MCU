@@ -4,7 +4,26 @@
 #include <driver/adc.h>
 
 #define DEVICE_NAME "OtterTuner"
+
 #define LENGTH 4000
+#define MAX_ADC_VALUE       4096
+
+#define STRING_SWITCH_PIN   3
+#define TUNING_BUTTON_PIN   4
+#define VBAT_PIN            10
+
+#define NUM_STRINGS         6
+#define UNWIND_MODE         6
+
+#define NUM_LEDS        6
+#define LED1_PIN        35
+#define LED2_PIN        37
+#define LED3_PIN        36
+#define LED4_PIN        34
+#define LED5_PIN        9
+#define LED6_PIN        8
+
+int LEDS[NUM_LEDS] = {LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN};
 
 Preferences preferences;
 double desired_freq;
@@ -17,8 +36,14 @@ short rawData[LENGTH];
  * 0  1  2  3  4  5
  */
 
-double tunings[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
-int string_number;
+double tunings[NUM_STRINGS] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
+int string_number = 0;
+
+volatile bool buttonInterrupt = false;
+
+void IRAM_ATTR ISR() {
+    buttonInterrupt = true;
+}
 
 double get_tuning(){
 	preferences.begin(DEVICE_NAME, true);
@@ -29,66 +54,50 @@ double get_tuning(){
 	return tunings[string_number];
 }
 
-void adc_setup(){
-    adc_digi_init_config_t config;
-	config.max_store_buf_size = 1024;
-	config.adc1_chan_mask = BIT(6);
-	config.adc2_chan_mask = 0;
-	config.conv_num_each_intr = 256;
-
-	adc_digi_pattern_config_t adc_pattern;
-	adc_pattern.atten = ADC_ATTEN_DB_0;
-	adc_pattern.channel = ADC1_CHANNEL_4;
-	adc_pattern.unit = ADC_UNIT_1;
-	adc_pattern.bit_width = 12;
-
-    adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_0);
-
-	adc_digi_configuration_t controller_config;
-	controller_config.conv_limit_en = 0;
-	controller_config.conv_limit_num = 250;
-	controller_config.pattern_num = 1;
-	controller_config.adc_pattern = &adc_pattern;
-	controller_config.sample_freq_hz = 60000;
-	controller_config.conv_mode = ADC_CONV_SINGLE_UNIT_1;
-	controller_config.format = ADC_DIGI_OUTPUT_FORMAT_TYPE2;
-}
-
 void setup() {
-	Serial.begin(115200);
-	motorSetup();
-	bluetooth_init();
+    Serial.begin(115200);
+    motorSetup();
+    bluetooth_init();
     adc_setup();
+    buttonSetup();
+    LED_Setup();
     sample_freq = 0;
-	delay(3000);
-	Serial.println("setup complete");
+    delay(3000);
+    pinMode( VBAT_PIN, OUTPUT );
+    Serial.println("setup complete");
 }
 
 void loop() {
 	// Serial_Monitor();
-    int in = Serial.read();
-    if (in == 'n') {
-        string_number = (string_number + 1) % 6;
-        desired_freq = tunings[string_number];
-        Serial.printf("string number: %d\r\n", string_number);
-    } else if (in == 'p') {
-        string_number = (string_number - 1) % 6;
-        desired_freq = tunings[string_number];
-        Serial.printf("string number: %d\r\n", string_number);
+    int isTuningOn = digitalRead( TUNING_BUTTON_PIN );
+    
+    if( buttonInterrupt ) {
+        buttonHandler();
+        buttonInterrupt = false;
+    } else if( isTuningOn == HIGH ) {
+        // If we're at string number 6, then we're unwinding the string
+        if (string_number == UNWIND_MODE) {
+            Serial.println("Unwinding string");
+            unwindString();
+        } else {
+            getSamples();
+
+            double prev_freq = desired_freq;
+            desired_freq = get_tuning();
+
+            double current_frequency = measureFrequency(sample_freq);
+            Serial.printf("current_frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);
+
+            pid(current_frequency);
+        }
+    } else {
+        // TODO: Insert battery reading code
+        float batteryVoltage = analogRead(ADC1_CHANNEL_MAX);
+        float batteryPercentage = batteryVoltage / MAX_ADC_VALUE;
+
+        if( batteryPercentage <= 0.2) {
+            Serial.println("Battery low!");
+            LowBatteryAnimation();
+        }
     }
-
-    double startTime = millis();
-    for (int i = 0; i < LENGTH; i++) {
-        rawData[i] = adc1_get_raw(ADC1_CHANNEL_4);
-    }
-    double endTime = millis();
-    sample_freq = (LENGTH / (endTime - startTime)) * 1000;
-
-    double prev_freq = desired_freq;
-
-    desired_freq = get_tuning();
-    double current_frequency = measureFrequency(sample_freq);
-    Serial.printf("current frequency: %d, desired freq: %f\r\n", current_frequency, desired_freq);
-
-    pid(current_frequency);
 }

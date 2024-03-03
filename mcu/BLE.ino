@@ -42,15 +42,14 @@ class MyServerCallbacks: public BLEServerCallbacks
 {
     void onConnect(BLEServer* pServer) override
     {
-        Serial.println("onConnect");
+        Serial.println("MCU connected to phone via BLE");
         g_centralConnected = true;
+        BLEDevice::stopAdvertising();
     }
 
     void onDisconnect(BLEServer* pServer) override
     {
-        Serial.println("onDisconnect, will start advertising");
-        g_centralConnected = false;
-        BLEDevice::startAdvertising();
+        Serial.println("MCU disconnected from phone");
     }
 };
 
@@ -200,6 +199,6 @@ void bluetooth_init(){
         pAdvertising->setMinPreferred(0x06);
         pAdvertising->setMinPreferred(0x12);
     }
-    BLEDevice::startAdvertising();
+    // BLEDevice::startAdvertising();
 }
 
