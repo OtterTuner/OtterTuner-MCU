@@ -42,8 +42,9 @@ class MyServerCallbacks: public BLEServerCallbacks
 {
     void onConnect(BLEServer* pServer) override
     {
-        Serial.println("onConnect");
+        Serial.println("MCU connected to phone via BLE");
         g_centralConnected = true;
+        BLEDevice::stopAdvertising();
     }
 
     void onDisconnect(BLEServer* pServer) override

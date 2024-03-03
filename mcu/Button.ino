@@ -12,13 +12,10 @@ void buttonSetup() {
 void buttonHandler() {
     delayMicroseconds(DEBOUNCE_TIME);
     int buttonRead = digitalRead(digitalPinToInterrupt(STRING_SWITCH_PIN));
-    Serial.printf("button read: %d\r\n", digitalRead(digitalPinToInterrupt(STRING_SWITCH_PIN)));
 
     if(buttonRead == HIGH) {
-        Serial.println("Button pressed");
         pressed_time = millis();
     } else {
-        Serial.println("Button released");
         int release_time = millis();
 
         if(release_time - pressed_time > LONG_PRESS ) {
