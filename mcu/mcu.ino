@@ -7,6 +7,8 @@
 #define LENGTH 4000
 #define STRING_SWITCH_PIN   3
 #define TUNING_BUTTON_PIN   4
+#define VBAT_PIN            10
+#define MAX_ADC_VALUE       4096
 
 Preferences preferences;
 double desired_freq;
@@ -49,6 +51,7 @@ void setup() {
     buttonSetup();
     sample_freq = 0;
     delay(3000);
+    pinMode( VBAT_PIN, OUTPUT );
     Serial.println("setup complete");
 }
 
@@ -76,7 +79,11 @@ void loop() {
         pid(current_frequency);
     } else {
         // TODO: Insert battery reading code
-        int batteryVoltage = analogRead(ADC1_CHANNEL_MAX);
-        // Serial.printf("Battery Voltage: %d\r\n", batteryVoltage);
+        float batteryVoltage = analogRead(ADC1_CHANNEL_MAX);
+        float batteryPercentage = batteryVoltage / MAX_ADC_VALUE;
+
+        if( batteryPercentage <= 0.2) {
+            Serial.println("Battery low!");
+        }
     }
 }
