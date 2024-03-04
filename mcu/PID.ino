@@ -7,49 +7,49 @@ char in;
 int mode = 0;
 
 void Serial_Monitor() {
-  if (Serial.available() > 0) {
-    // read the incoming byte:
-    in = Serial.read();
-    if(in == 'p'){
-      mode = 1;
-      Serial.println("MODE P");
-    } else if(in == 'i'){
-      mode = 2;
-      Serial.println("MODE I");
-    } else if(in == 'd'){
-      mode = 3;
-      Serial.println("MODE D");
-    } else if(in == 'c') {
-      Serial.printf("p: %f\r\ni: %f\r\nd: %f\r\n", kp, ki, kd);
-    } else {
-      if(in == '+'){
-        if(mode == 1){
-          kp++;
-          Serial.printf("p: %f\r\n", kp);
-        } else if(mode == 2){
-          ki++;
-          Serial.printf("i: %f\r\n", ki);
-        } else if(mode == 3){
-          kd++;
-          Serial.printf("d: %f\r\n", kd);
+    if (Serial.available() > 0) {
+        // read the incoming byte:
+        in = Serial.read();
+        if(in == 'p'){
+            mode = 1;
+            Serial.println("MODE P");
+        } else if(in == 'i'){
+            mode = 2;
+            Serial.println("MODE I");
+        } else if(in == 'd'){
+            mode = 3;
+            Serial.println("MODE D");
+        } else if(in == 'c') {
+            Serial.printf("p: %f\r\ni: %f\r\nd: %f\r\n", kp, ki, kd);
+        } else {
+            if(in == '+'){
+                if(mode == 1){
+                    kp++;
+                    Serial.printf("p: %f\r\n", kp);
+                } else if(mode == 2){
+                    ki++;
+                    Serial.printf("i: %f\r\n", ki);
+                } else if(mode == 3){
+                    kd++;
+                    Serial.printf("d: %f\r\n", kd);
+                }
+            } else if(in == '-'){
+                if(mode == 1){
+                    kp--;
+                    Serial.printf("p: %f\r\n", kp);
+                } else if(mode == 2){
+                    ki--;
+                    Serial.printf("i: %f\r\n", ki);
+                } else if(mode == 3){
+                    kd--;
+                    Serial.printf("d: %f\r\n", kd);
+                }
+            } else {
+                mode = 0;
+                Serial.println("MODE CLEARED");
+            }
         }
-      } else if(in == '-'){
-        if(mode == 1){
-          kp--;
-          Serial.printf("p: %f\r\n", kp);
-        } else if(mode == 2){
-          ki--;
-          Serial.printf("i: %f\r\n", ki);
-        } else if(mode == 3){
-          kd--;
-          Serial.printf("d: %f\r\n", kd);
-        }
-      } else {
-        mode = 0;
-        Serial.println("MODE CLEARED");
-      }
     }
-  }
 }
 
 void pid(double frequency) {
