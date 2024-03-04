@@ -12,6 +12,9 @@
 #define TUNING_BUTTON_PIN   4
 #define VBAT_PIN            10
 
+#define MOTOR_IN1_PIN   7
+#define MOTOR_IN2_PIN   6
+
 #define NUM_STRINGS         6
 #define UNWIND_MODE         6
 
