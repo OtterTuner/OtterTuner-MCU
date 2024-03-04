@@ -67,7 +67,7 @@ void pid(double frequency) {
   // Read the position
   double pos = frequency;
   if(pos == -1){
-    setMotor(0,0,enable1Pin,motor1Pin1,motor1Pin2);
+    setMotor(0, 0, MOTOR_IN1_PIN, MOTOR_IN2_PIN);
     return;
   }
 
@@ -100,7 +100,7 @@ void pid(double frequency) {
   }
 
   // signal the motor
-  setMotor(dir,pwr,enable1Pin,motor1Pin1,motor1Pin2);
+  setMotor(dir, pwr, MOTOR_IN1_PIN, MOTOR_IN2_PIN);
 
   // store previous error
   eprev = e;
