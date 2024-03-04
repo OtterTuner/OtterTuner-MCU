@@ -5,7 +5,7 @@
 
 #define DEVICE_NAME "OtterTuner"
 
-#define LENGTH 4000
+#define LENGTH 2000
 #define MAX_ADC_VALUE       4096
 
 #define STRING_SWITCH_PIN   3
