@@ -33,7 +33,7 @@ SemaphoreHandle_t semaphore;
 
 Preferences preferences;
 double desired_freq;
-double current_frequency;
+double current_frequency = -1;
 double sample_freq;
 short rawData[LENGTH];
 bool bufferFull = false;
@@ -103,7 +103,7 @@ void setup() {
 }
 
 void loop() {
-	// Serial_Monitor();
+	Serial_Monitor();
     int isTuningOn = digitalRead( TUNING_BUTTON_PIN );
     
     if( buttonInterrupt )
@@ -125,7 +125,7 @@ void loop() {
             double prev_freq = desired_freq;
             desired_freq = get_tuning();
             if( semaphore != NULL && xSemaphoreTake(semaphore, (TickType_t) 10) == pdTRUE) {
-                Serial.printf("In tuning mode. Current Frequency: %f\r\n", current_frequency);
+                // Serial.printf("In tuning mode. Current Frequency: %f\r\n", current_frequency);
                 pid(current_frequency);
                 xSemaphoreGive(semaphore);
             }

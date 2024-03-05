@@ -1,9 +1,6 @@
 #define OFFSET          2048
 #define MAX_ADC_VALUE   4096
 
-int thresh = 0;
-double freq_thres = 0.30 * desired_freq;
-
 void adc_setup(){
     adc_digi_init_config_t config;
     config.max_store_buf_size = 1024;
@@ -71,6 +68,7 @@ double measureFrequency(double sample_freq) {
     static short pd_state = 0;
     int period = 0;
     double measured_freq;
+    int thresh = 0;
 
     for(int i = 0; i < LENGTH; i++) {
         sum_old = sum;
@@ -100,7 +98,7 @@ double measureFrequency(double sample_freq) {
     // Ensure that we get a valid period
     if(period != 0) {
         measured_freq = sample_freq/period;
-        freq_thres = 0.20 * desired_freq;
+        int freq_thres = 0.30 * desired_freq;
 
         double discrepancy = abs(desired_freq - measured_freq);
 
