@@ -1,30 +1,20 @@
-#define PWM_FREQUENCY   3000
+#define PWM_FREQUENCY   30000
+#define PWM_RESOLUTION  8
 #define PWM_MAX_VALUE   255
 
-volatile int posi = 0;
-long prevT = 0;
-float eprev = 0;
-float eintegral = 0;
+#define LEDC_CHANNEL_0  0
+#define LEDC_CHANNEL_1  1
 
 /*
 *	MOTOR CONTROL
 */
-
-void softwarePWM(int pin, int dutyCycle) {
-    int onTime = map(dutyCycle, 0, PWM_MAX_VALUE, 0, 100) * PWM_FREQUENCY / 100;
-    int offTime = PWM_FREQUENCY - onTime;
-
-    digitalWrite(pin, HIGH);
-    delay(onTime);
-
-    digitalWrite(pin, LOW);
-    delay(offTime);
-}
-
 void motorSetup() {
+    ledcSetup(LEDC_CHANNEL_0, PWM_FREQUENCY, PWM_RESOLUTION);
+    ledcSetup(LEDC_CHANNEL_1, PWM_FREQUENCY, PWM_RESOLUTION);
+
     // sets the pins as outputs:
-    pinMode(MOTOR_IN1_PIN, OUTPUT);
-    pinMode(MOTOR_IN2_PIN, OUTPUT);
+    ledcAttachPin(MOTOR_IN1_PIN, LEDC_CHANNEL_0);
+    ledcAttachPin(MOTOR_IN2_PIN, LEDC_CHANNEL_1);
 }
 
 void unwindString(){
@@ -33,16 +23,16 @@ void unwindString(){
 
 void setMotor(int dir, int pwmVal, int in1, int in2){
     if(dir == 1){
-        softwarePWM(in1, pwmVal);
-        digitalWrite(in2,LOW);
+        ledcWrite(LEDC_CHANNEL_0, pwmVal);
+        ledcWrite(LEDC_CHANNEL_1, 0);
     }
     else if(dir == -1){
-        digitalWrite(in1,LOW);
-        softwarePWM(in2, pwmVal);
+        ledcWrite(LEDC_CHANNEL_0, 0);
+        ledcWrite(LEDC_CHANNEL_1, pwmVal);
     }
     else{
-        digitalWrite(in1,LOW);
-        digitalWrite(in2,LOW);
+        ledcWrite(LEDC_CHANNEL_0, 0);
+        ledcWrite(LEDC_CHANNEL_1, 0);
     }
 }
 
