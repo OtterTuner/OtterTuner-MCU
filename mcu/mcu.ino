@@ -45,10 +45,10 @@ volatile bool buttonInterrupt = false;
  */
 
 double tunings[NUM_STRINGS] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
-int string_number;
+int string_number = 0;
 
 Preferences preferences;
-double desired_freq;
+double desired_freq = tunings[string_number];
 double current_frequency = -1;
 double sample_freq;
 short rawData[LENGTH];
@@ -90,8 +90,6 @@ void setup() {
     buttonSetup();
     LED_Setup();
     sample_freq = 0;
-    string_number = 0;
-    desired_freq = tunings[string_number];
     pinMode( VBAT_PIN, OUTPUT );
 
     semaphore = xSemaphoreCreateMutex();
@@ -111,6 +109,7 @@ void setup() {
 void loop() {
 	// Serial_Monitor();
     int isTuningOn = digitalRead( TUNING_BUTTON_PIN );
+    desired_freq = get_tuning();
     
     if( buttonInterrupt )
     {
@@ -128,7 +127,6 @@ void loop() {
         else
         {
             double prev_freq = desired_freq;
-            desired_freq = get_tuning();
             if( semaphore != NULL && xSemaphoreTake(semaphore, (TickType_t) 10) == pdTRUE) {
                 // Serial.printf("In tuning mode. Current Frequency: %f\r\n", current_frequency);
                 pid(current_frequency);
