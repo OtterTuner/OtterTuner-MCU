@@ -2,6 +2,8 @@ void LED_Setup(){
     for( int i = 0; i < NUM_LEDS; i++ ) {
         pinMode( LEDS[i], OUTPUT );
     }
+
+    digitalWrite(LEDS[string_number], HIGH);
 }
 
 void BLEAnimation() {
@@ -15,6 +17,10 @@ void BLEAnimation() {
     }
 
     digitalWrite(LEDS[NUM_LEDS-1], LOW);
+
+    delay(500);
+
+    digitalWrite(LEDS[string_number], HIGH);
 }
 
 void LowBatteryAnimation() {
@@ -26,4 +32,6 @@ void LowBatteryAnimation() {
         digitalWrite(LEDS[i], LOW);
     }
     delay(500);
+
+    digitalWrite(LEDS[string_number], HIGH);
 }

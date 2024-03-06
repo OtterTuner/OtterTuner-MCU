@@ -86,8 +86,8 @@ private:
 
         preferences.begin(DEVICE_NAME, false);
         preferences.putString("tuning", pCharacteristic->getValue().c_str());
-        String s = preferences.getString("tuning","");
-        Serial.println(s);
+        String tuningString = preferences.getString("tuning","");
+        parseTuningString(tuningString);
         preferences.end();
     }
 

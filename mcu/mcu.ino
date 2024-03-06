@@ -89,6 +89,7 @@ void setup() {
     adc_setup();
     buttonSetup();
     LED_Setup();
+    desired_freq = get_tuning();
     sample_freq = 0;
     pinMode( VBAT_PIN, OUTPUT );
 
@@ -109,7 +110,7 @@ void setup() {
 void loop() {
 	// Serial_Monitor();
     int isTuningOn = digitalRead( TUNING_BUTTON_PIN );
-    desired_freq = get_tuning();
+    desired_freq = tunings[string_number];
     
     if( buttonInterrupt )
     {
@@ -136,9 +137,8 @@ void loop() {
     }
     else
     {
-        // TODO: Insert battery reading code
+        stopMotor();
         float batteryVoltage = analogRead(VBAT_PIN);
-
         // Serial.printf("battery voltage: %f, low battery threshold: %f, low battery percentage: %f\r\n", batteryVoltage, LOW_BATTERY_ADC, LOW_BATTERY_PERC);
 
         if( batteryVoltage <= LOW_BATTERY_ADC)

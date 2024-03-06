@@ -18,7 +18,11 @@ void motorSetup() {
 }
 
 void unwindString(){
-    setMotor(-1, PWM_MAX_VALUE, MOTOR_IN1_PIN, MOTOR_IN2_PIN);
+    setMotor(1, PWM_MAX_VALUE, MOTOR_IN1_PIN, MOTOR_IN2_PIN);
+}
+
+void stopMotor(){
+    setMotor(0, 0, MOTOR_IN1_PIN, MOTOR_IN2_PIN);
 }
 
 void setMotor(int dir, int pwmVal, int in1, int in2){

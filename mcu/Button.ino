@@ -24,7 +24,6 @@ void buttonHandler() {
             g_centralConnected = false;
             BLEDevice::startAdvertising();
             BLEAnimation();
-            BLEAnimation();
         } else {
             string_number = (string_number + 1) % 7;
             if(string_number == UNWIND_MODE) {
