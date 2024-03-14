@@ -42,14 +42,15 @@ class MyServerCallbacks: public BLEServerCallbacks
 {
     void onConnect(BLEServer* pServer) override
     {
-        Serial.println("MCU connected to phone via BLE");
+        Serial.println("onConnect");
         g_centralConnected = true;
-        BLEDevice::stopAdvertising();
     }
 
     void onDisconnect(BLEServer* pServer) override
     {
-        Serial.println("MCU disconnected from phone");
+        Serial.println("onDisconnect, will start advertising");
+        g_centralConnected = false;
+        BLEDevice::startAdvertising();
     }
 };
 
@@ -86,8 +87,8 @@ private:
 
         preferences.begin(DEVICE_NAME, false);
         preferences.putString("tuning", pCharacteristic->getValue().c_str());
-        String tuningString = preferences.getString("tuning","");
-        parseTuningString(tuningString);
+        String s = preferences.getString("tuning","");
+        Serial.println(s);
         preferences.end();
     }
 
@@ -199,6 +200,6 @@ void bluetooth_init(){
         pAdvertising->setMinPreferred(0x06);
         pAdvertising->setMinPreferred(0x12);
     }
-    // BLEDevice::startAdvertising();
+    BLEDevice::startAdvertising();
 }
 

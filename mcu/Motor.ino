@@ -1,58 +1,43 @@
-/*
-* Motor globals
-*/
+#define PWM_FREQUENCY   30000
+#define PWM_RESOLUTION  8
+#define PWM_MAX_VALUE   255
 
-// Motor 1
-int motor1Pin1 = 37;
-int motor1Pin2 = 35;
-int enable1Pin = 36;
-
-// Encoder 1
-int encoderPin1 = 6;
-int encoderPin2 = 7;
-
-volatile int posi = 0;
-long prevT = 0;
-float eprev = 0;
-float eintegral = 0;
-
-// Setting PWM properties
-const int freq = 30000;
-const int pwmChannel = 0;
-const int resolution = 8;
+#define LEDC_CHANNEL_0  0
+#define LEDC_CHANNEL_1  1
 
 /*
 *	MOTOR CONTROL
 */
-
 void motorSetup() {
-  // sets the pins as outputs:
-  pinMode(motor1Pin1, OUTPUT);
-  pinMode(motor1Pin2, OUTPUT);
-  pinMode(enable1Pin, OUTPUT);
+    ledcSetup(LEDC_CHANNEL_0, PWM_FREQUENCY, PWM_RESOLUTION);
+    ledcSetup(LEDC_CHANNEL_1, PWM_FREQUENCY, PWM_RESOLUTION);
 
-  // configure LED PWM functionalitites
-  ledcSetup(pwmChannel, freq, resolution);
-
-  // attach the channel to the GPIO to be controlled
-  ledcAttachPin(enable1Pin, pwmChannel);
+    // sets the pins as outputs:
+    ledcAttachPin(MOTOR_IN1_PIN, LEDC_CHANNEL_0);
+    ledcAttachPin(MOTOR_IN2_PIN, LEDC_CHANNEL_1);
 }
 
-void setMotor(int dir, int pwmVal, int pwm, int in1, int in2){
-  ledcWrite(pwmChannel, pwmVal);
+void unwindString(){
+    setMotor(1, PWM_MAX_VALUE, MOTOR_IN1_PIN, MOTOR_IN2_PIN);
+}
 
-  if(dir == 1){
-	digitalWrite(in1,HIGH);
-	digitalWrite(in2,LOW);
-  }
-  else if(dir == -1){
-	digitalWrite(in1,LOW);
-	digitalWrite(in2,HIGH);
-  }
-  else{
-	digitalWrite(in1,LOW);
-	digitalWrite(in2,LOW);
-  }
+void stopMotor(){
+    setMotor(0, 0, MOTOR_IN1_PIN, MOTOR_IN2_PIN);
+}
+
+void setMotor(int dir, int pwmVal, int in1, int in2){
+    if(dir == 1){
+        ledcWrite(LEDC_CHANNEL_0, pwmVal);
+        ledcWrite(LEDC_CHANNEL_1, 0);
+    }
+    else if(dir == -1){
+        ledcWrite(LEDC_CHANNEL_0, 0);
+        ledcWrite(LEDC_CHANNEL_1, pwmVal);
+    }
+    else{
+        ledcWrite(LEDC_CHANNEL_0, 0);
+        ledcWrite(LEDC_CHANNEL_1, 0);
+    }
 }
 
 
