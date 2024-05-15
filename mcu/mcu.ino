@@ -129,7 +129,6 @@ void loop() {
         {
             double prev_freq = desired_freq;
             if( semaphore != NULL && xSemaphoreTake(semaphore, (TickType_t) 10) == pdTRUE) {
-                // Serial.printf("In tuning mode. Current Frequency: %f\r\n", current_frequency);
                 TuningAnimation(current_frequency, desired_freq);
                 pid(current_frequency);
                 xSemaphoreGive(semaphore);
@@ -142,12 +141,11 @@ void loop() {
         setLEDs(led_to_light);
         stopMotor();
         float batteryVoltage = analogRead(VBAT_PIN);
-        // Serial.printf("battery voltage: %f, low battery threshold: %f, low battery percentage: %f\r\n", batteryVoltage, LOW_BATTERY_ADC, LOW_BATTERY_PERC);
 
         if( batteryVoltage <= LOW_BATTERY_ADC)
         {
-            // Serial.println("Battery low!");
-            // LowBatteryAnimation();
+            Serial.println("Battery low!");
+            LowBatteryAnimation();
         }
     }
 }
